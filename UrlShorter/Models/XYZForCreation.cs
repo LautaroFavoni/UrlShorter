@@ -1,6 +1,9 @@
-﻿namespace UrlShorter.Models
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace UrlShorter.Models
 {
     public class XYZForCreation
     {
+
     }
 }
