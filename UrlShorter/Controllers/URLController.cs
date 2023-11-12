@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using UrlShorter.Data;
@@ -21,78 +22,51 @@ namespace UrlShorter.Controllers
     public class URLController : ControllerBase
     {
         private readonly URLShortContext _context;
-        public URLController(URLShortContext context)
+        private readonly URLServices _services;
+        public URLController(URLShortContext context, URLServices services)
         {
             _context = context;
+            _services = services;
         }
 
         [HttpPost]
-        public IActionResult POSTURL([FromQuery] string URLUser, string? Categoria)
+        public IActionResult POSTURL([FromBody] string URLUser, [FromQuery] string? Categoria)
         {
-            string larga = string.Empty;
-            string corta = string.Empty;
-            URLUser = URLUser.ToString();
-            URL URLDTO = new URL();
 
-            if (URLUser.Length >6 ) //codigo para ver si es mayor a 6 digitos
+            int IdUser = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+
+
+
+            if (URLUser.Length > 6) //codigo para ver si es mayor a 6 digitos
             {
                 if (_context.URLs.Any(u => u.URLLong == URLUser))    //codigo para ver si esta en la base de datos
                 {
 
-                    SumarContador(URLUser);
-                    return Ok(URLDTO);
-                    //URLDTO = _context.URLs.SingleOrDefault(u => u.URLLong == URLUser);
-                    //URLDTO.contador++;
-                    //_context.URLs.Update(URLDTO);
-                    //_context.SaveChanges();
-
+                    int contador = _services.SumarContador(URLUser);
+                    return Ok(contador);
 
                 }
                 else
                 {
 
-                    string ShortURL = CrearShortUrl(URLUser);
+                    string ShortURL = _services.CrearShortUrl(URLUser);
+                    _services.GuardarURL(URLUser, ShortURL, Categoria, IdUser);
 
-                    Console.WriteLine(ShortURL);
-
-                    URLDTO = new URL();
-                    URLDTO.URLLong = URLUser;
-                    URLDTO.URLShort = ShortURL;
-                    if (Categoria != null) { URLDTO.Categoria = _context.Categorias.SingleOrDefault(u => u.Name == Categoria); }
-                    
-                    URLDTO.IdCategoria = URLDTO.Categoria.Id;
-                    
-                    _context.URLs.Add(URLDTO);
-                    _context.SaveChanges();
-
-                    return Ok(URLDTO);
+                    return Ok(ShortURL);
                 }
 
             }
-            
-            return Ok(URLDTO.ToString());
-            
-            string CrearShortUrl(string url) 
+            else
             {
-                // Genera una cadena aleatoria para la URL corta
-                StringBuilder shortUrl = new StringBuilder();
-                Random random = new Random();
-                for (int i = 0; i < 6; i++)
+                if (_context.URLs.Any(u => u.URLShort == URLUser))
                 {
-                    string CharSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-                    shortUrl.Append(CharSet[random.Next(CharSet.Length)]);
+                    string URLLong = _services.GetURLLongForShort(URLUser);
+                    int contador = _services.SumarContador(URLUser);
+                    return Ok(URLLong);
                 }
-
-                return shortUrl.ToString();
-            };
-            
-            void SumarContador(string URLUser ) 
-            {
-            URLDTO = _context.URLs.SingleOrDefault(u => u.URLLong == URLUser);
-                URLDTO.contador++;
-            _context.URLs.Update(URLDTO);
-            _context.SaveChanges();
+                else return BadRequest("La URL no se encuentra en la  base de datos.");
             }
+
 
         }
 
@@ -103,6 +77,44 @@ namespace UrlShorter.Controllers
             return Ok(_context.URLs.ToList());
         }
 
-        
+
+        [HttpGet("Urls-por-Usuario")]
+        public IActionResult GetURLporUsuario()
+        {
+            int IdUser = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+
+
+
+            return Ok(_services.GetUrlsPorUsuario(IdUser));
+        }
+
+
+        [HttpPut("Free-URL")]
+        [AllowAnonymous]
+
+        public IActionResult FreeURL([FromBody] string URL)
+        {
+
+
+            int? IdUser = int.TryParse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value, out var userId) ? userId : (int?)null;
+            if (IdUser.HasValue)
+            {
+
+                return Ok(POSTURL(URL, "Sin Categoria")
+);
+            }
+            else
+            {
+                if (_context.URLs.Any(u => u.URLShort == URL))
+                {
+                    string URLLong = _services.GetURLLongForShort(URL);
+                    int contador = _services.SumarContador(URL);
+                    return Ok(URLLong);
+                }
+                else return BadRequest("La URL no se encuentra en la  base de datos.");
+            }
+
+
+        }
     }
 }

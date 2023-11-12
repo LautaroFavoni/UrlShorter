@@ -26,6 +26,21 @@ namespace UrlShorter.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Password = table.Column<string>(type: "TEXT", nullable: false),
+                    RolUser = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "URLs",
                 columns: table => new
                 {
@@ -33,7 +48,9 @@ namespace UrlShorter.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     URLShort = table.Column<string>(type: "TEXT", nullable: true),
                     URLLong = table.Column<string>(type: "TEXT", nullable: true),
-                    IdCategoria = table.Column<int>(type: "INTEGER", nullable: false)
+                    contador = table.Column<int>(type: "INTEGER", nullable: false),
+                    IdCategoria = table.Column<int>(type: "INTEGER", nullable: false),
+                    IdUser = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -42,6 +59,12 @@ namespace UrlShorter.Migrations
                         name: "FK_URLs_Categorias_IdCategoria",
                         column: x => x.IdCategoria,
                         principalTable: "Categorias",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_URLs_Users_IdUser",
+                        column: x => x.IdUser,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -56,19 +79,34 @@ namespace UrlShorter.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "URLs",
-                columns: new[] { "Id", "IdCategoria", "URLLong", "URLShort" },
+                table: "Users",
+                columns: new[] { "Id", "Name", "Password", "RolUser" },
                 values: new object[,]
                 {
-                    { 1, 1, "Lasoadsat", "jef" },
-                    { 2, 2, "Lasotsdasdsa", "Karenaaa" },
-                    { 3, 2, "Ldsadsadasdasot", "asddsadsa" }
+                    { 1, "Lautaro", "password", 0 },
+                    { 2, "Jose", "password", 1 },
+                    { 3, "Guest", "password", 2 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "URLs",
+                columns: new[] { "Id", "IdCategoria", "IdUser", "URLLong", "URLShort", "contador" },
+                values: new object[,]
+                {
+                    { 1, 1, 1, "Lasoadsat", "jef", 0 },
+                    { 2, 2, 2, "Lasotsdasdsa", "Karenaaa", 1 },
+                    { 3, 2, 2, "Ldsadsadasdasot", "asddsadsa", 2 }
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_URLs_IdCategoria",
                 table: "URLs",
                 column: "IdCategoria");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_URLs_IdUser",
+                table: "URLs",
+                column: "IdUser");
         }
 
         /// <inheritdoc />
@@ -79,6 +117,9 @@ namespace UrlShorter.Migrations
 
             migrationBuilder.DropTable(
                 name: "Categorias");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }

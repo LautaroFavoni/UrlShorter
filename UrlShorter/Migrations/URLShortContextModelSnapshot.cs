@@ -97,6 +97,9 @@ namespace UrlShorter.Migrations
                     b.Property<int>("IdCategoria")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("IdUser")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("URLLong")
                         .HasColumnType("TEXT");
 
@@ -110,6 +113,8 @@ namespace UrlShorter.Migrations
 
                     b.HasIndex("IdCategoria");
 
+                    b.HasIndex("IdUser");
+
                     b.ToTable("URLs");
 
                     b.HasData(
@@ -117,6 +122,7 @@ namespace UrlShorter.Migrations
                         {
                             Id = 1,
                             IdCategoria = 1,
+                            IdUser = 1,
                             URLLong = "Lasoadsat",
                             URLShort = "jef",
                             contador = 0
@@ -125,6 +131,7 @@ namespace UrlShorter.Migrations
                         {
                             Id = 2,
                             IdCategoria = 2,
+                            IdUser = 2,
                             URLLong = "Lasotsdasdsa",
                             URLShort = "Karenaaa",
                             contador = 1
@@ -133,6 +140,7 @@ namespace UrlShorter.Migrations
                         {
                             Id = 3,
                             IdCategoria = 2,
+                            IdUser = 2,
                             URLLong = "Ldsadsadasdasot",
                             URLShort = "asddsadsa",
                             contador = 2
@@ -147,7 +155,15 @@ namespace UrlShorter.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("UrlShorter.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("IdUser")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Categoria");
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

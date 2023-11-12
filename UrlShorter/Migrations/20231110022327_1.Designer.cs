@@ -10,7 +10,7 @@ using UrlShorter.Data;
 namespace UrlShorter.Migrations
 {
     [DbContext(typeof(URLShortContext))]
-    [Migration("20231029153653_1")]
+    [Migration("20231110022327_1")]
     partial class _1
     {
         /// <inheritdoc />
@@ -46,6 +46,51 @@ namespace UrlShorter.Migrations
                         });
                 });
 
+            modelBuilder.Entity("UrlShorter.Entities.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("RolUser")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Lautaro",
+                            Password = "password",
+                            RolUser = 0
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Jose",
+                            Password = "password",
+                            RolUser = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Guest",
+                            Password = "password",
+                            RolUser = 2
+                        });
+                });
+
             modelBuilder.Entity("UrlShorter.entities.URL", b =>
                 {
                     b.Property<int>("Id")
@@ -55,15 +100,23 @@ namespace UrlShorter.Migrations
                     b.Property<int>("IdCategoria")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("IdUser")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("URLLong")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("URLShort")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("contador")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("IdCategoria");
+
+                    b.HasIndex("IdUser");
 
                     b.ToTable("URLs");
 
@@ -72,22 +125,28 @@ namespace UrlShorter.Migrations
                         {
                             Id = 1,
                             IdCategoria = 1,
+                            IdUser = 1,
                             URLLong = "Lasoadsat",
-                            URLShort = "jef"
+                            URLShort = "jef",
+                            contador = 0
                         },
                         new
                         {
                             Id = 2,
                             IdCategoria = 2,
+                            IdUser = 2,
                             URLLong = "Lasotsdasdsa",
-                            URLShort = "Karenaaa"
+                            URLShort = "Karenaaa",
+                            contador = 1
                         },
                         new
                         {
                             Id = 3,
                             IdCategoria = 2,
+                            IdUser = 2,
                             URLLong = "Ldsadsadasdasot",
-                            URLShort = "asddsadsa"
+                            URLShort = "asddsadsa",
+                            contador = 2
                         });
                 });
 
@@ -99,7 +158,15 @@ namespace UrlShorter.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("UrlShorter.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("IdUser")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Categoria");
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

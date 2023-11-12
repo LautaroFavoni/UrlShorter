@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UrlShorter.entities;
 using UrlShorter.Entities;
+
 using UrlShorter.Models.Enum;
 
 namespace UrlShorter.Data
@@ -29,34 +30,6 @@ namespace UrlShorter.Data
                 Id = 2,
                 Name = "Diversion"
             };
-
-            URL url = new URL()
-            {
-                Id = 1,
-                URLShort = "jef",
-                URLLong = "Lasoadsat",
-                contador = 0,
-                IdCategoria = Trabajo.Id
-            };
-            URL url1 = new URL()
-            {
-                Id = 2,
-                URLShort = "Karenaaa",
-                URLLong = "Lasotsdasdsa",
-                contador = 1,
-                
-                IdCategoria = Diversion.Id
-            };
-
-            URL url2 = new URL()
-            {
-                Id = 3,
-                URLShort = "asddsadsa",
-                URLLong = "Ldsadsadasdasot",
-                contador = 2,
-                IdCategoria = Diversion.Id
-            };
-
             User Usuario1 = new User()
             {
                 Id = 1,
@@ -83,10 +56,48 @@ namespace UrlShorter.Data
                 RolUser = Role.Guest
 
             };
+
+            URL url = new URL()
+            {
+                Id = 1,
+                URLShort = "jef",
+                URLLong = "Lasoadsat",
+                contador = 0,
+                IdCategoria = Trabajo.Id,
+                IdUser = Usuario1.Id
+            };
+            URL url1 = new URL()
+            {
+                Id = 2,
+                URLShort = "Karenaaa",
+                URLLong = "Lasotsdasdsa",
+                contador = 1,
+                IdCategoria = Diversion.Id,
+                IdUser = Usuario2.Id
+                
+            };
+
+            URL url2 = new URL()
+            {
+                Id = 3,
+                URLShort = "asddsadsa",
+                URLLong = "Ldsadsadasdasot",
+                contador = 2,
+                IdCategoria = Diversion.Id,
+                IdUser = Usuario2.Id
+            };
+
+            modelBuilder.Entity<URL>()
+            .HasOne(c => c.User)
+            .WithMany()
+            .HasForeignKey(c => c.IdUser);
             modelBuilder.Entity<URL>()
             .HasOne(c => c.Categoria)
             .WithMany()
             .HasForeignKey(c => c.IdCategoria);
+
+
+
 
             modelBuilder.Entity<Categoria>().HasData(Trabajo, Diversion);
             modelBuilder.Entity<URL>().HasData(url, url1, url2);

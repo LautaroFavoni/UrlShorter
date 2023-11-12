@@ -19,6 +19,13 @@ namespace UrlShorter.entities
             public int IdCategoria { get; set; }
             public Categoria Categoria { get; set; }
 
-        }
+            [ForeignKey("IdUser")]
+
+            public int IdUser { get; set; }
+
+            public User? User { get; set; }
+
+
+    }
 
 }
