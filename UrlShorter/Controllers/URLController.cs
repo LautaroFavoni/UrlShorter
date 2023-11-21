@@ -64,7 +64,7 @@ namespace UrlShorter.Controllers
                     int contador = _services.SumarContador(URLUser);
                     return Ok(URLLong);
                 }
-                else return BadRequest("La URL no se encuentra en la  base de datos.");
+                else return Ok("La URL no se encuentra en la  base de datos.");
             }
 
 
@@ -111,7 +111,7 @@ namespace UrlShorter.Controllers
                     int contador = _services.SumarContador(URL);
                     return Ok(URLLong);
                 }
-                else return BadRequest("La URL no se encuentra en la  base de datos.");
+                else return Ok("La URL no se encuentra en la  base de datos.");
             }
 
 
